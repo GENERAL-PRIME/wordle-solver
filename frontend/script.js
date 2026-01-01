@@ -80,6 +80,11 @@ async function startGame() {
     "info"
   ).innerText = `Candidates remaining: ${data.candidates}`;
 }
+async function wakeBackend() {
+  try {
+    await fetch(`${API}/health`);
+  } catch {}
+}
 
 async function submitFeedback() {
   if (gameSolved) return;
@@ -139,5 +144,5 @@ async function restartGame() {
   tileState = [0, 0, 0, 0, 0];
   await startGame();
 }
-
+await wakeBackend();
 startGame();
