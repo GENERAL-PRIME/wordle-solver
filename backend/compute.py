@@ -66,15 +66,16 @@ def compute_feedback(guess, target):
 # --------------------------------------------------
 # Build Feedback Table
 # --------------------------------------------------
-def build_feedback_table(words_enc):
-    n = len(words_enc)
-    table = [[0] * n for _ in range(n)]
+def build_feedback_table(words_enc, answers_count):
+    total_words = len(words_enc)
+    table = []
 
-    for i in tqdm(range(n), desc="Building feedback table"):
+    for i in tqdm(range(answers_count), desc="Building feedback table"):
         gi = words_enc[i]
-        row = table[i]
-        for j in range(n):
+        row = [0] * total_words
+        for j in range(total_words):
             row[j] = compute_feedback(gi, words_enc[j])
+        table.append(row)
 
     return table
 
@@ -123,7 +124,7 @@ def main():
     answers_count = len(answers)
 
     words_enc = encode_words(words)
-    fb_table = build_feedback_table(words_enc)
+    fb_table = build_feedback_table(words_enc, answers_count)
 
     save(words, os.path.join(CACHE_DIR, "words.pkl"))
     save(fb_table, os.path.join(CACHE_DIR, "feedback_table.pkl"))
