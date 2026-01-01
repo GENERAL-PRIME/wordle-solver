@@ -87,14 +87,30 @@ async function submitFeedback() {
   const feedback = buildFeedback();
   addToHistory(currentWord, feedback);
 
-  const res = await fetch(`${API}/step`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      session_id: sessionId,
-      feedback: feedback,
-    }),
-  });
+  let res;
+  try {
+    res = await fetch(`${API}/step`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: sessionId,
+        feedback: feedback,
+      }),
+    });
+  } catch {
+    alert("Backend unreachable. Restarting game.");
+    restartGame();
+    return;
+  }
+
+  if (!res.ok) {
+    const err = await res.json();
+    if (err.detail?.includes("Invalid")) {
+      alert("Session expired. Restarting game.");
+      restartGame();
+      return;
+    }
+  }
 
   const data = await res.json();
 
