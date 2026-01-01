@@ -87,6 +87,11 @@ async function wakeBackend() {
 }
 
 async function submitFeedback() {
+  if (!tileState.some((v) => v !== 0)) {
+    alert("Please enter feedback before submitting.");
+    return;
+  }
+
   if (gameSolved) return;
 
   const feedback = buildFeedback();
@@ -109,12 +114,9 @@ async function submitFeedback() {
   }
 
   if (!res.ok) {
-    const err = await res.json();
-    if (err.detail?.includes("Invalid")) {
-      alert("Session expired. Restarting game.");
-      restartGame();
-      return;
-    }
+    alert("Session expired or backend restarted. Restarting game.");
+    await restartGame();
+    return;
   }
 
   const data = await res.json();
@@ -144,5 +146,9 @@ async function restartGame() {
   tileState = [0, 0, 0, 0, 0];
   await startGame();
 }
-await wakeBackend();
-startGame();
+async function init() {
+  await wakeBackend();
+  await startGame();
+}
+
+init();
