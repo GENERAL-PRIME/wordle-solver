@@ -97,7 +97,7 @@ def step(req: StepRequest):
 
     candidates = state["candidates"]
     guess = state["guess"]
-    print(req.feedback)
+    app.logger.info(req.feedback)
 
     fb = parse_feedback(req.feedback)
 
