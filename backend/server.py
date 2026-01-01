@@ -196,12 +196,11 @@ def step(req: StepRequest):
     if len(candidates) == 1:
         next_guess = candidates[0]
     else:
-        guess_space = (
-            candidates[:MAX_ENTROPY_GUESSES]
-            if len(candidates) <= MAX_ENTROPY_GUESSES
-            else range(TOTAL)
+        next_guess = best_guess(
+            candidates,
+            range(TOTAL),
+            fb_get,
         )
-        next_guess = best_guess(candidates, guess_space, fb_get)
 
     with lock:
         state["candidates"] = candidates

@@ -55,11 +55,15 @@ def main():
 
     print("🧠 Building mmap feedback.bin …")
     with open(BIN_PATH, "wb") as f:
-        for i in tqdm(range(answers_count), desc="Answers"):
-            gi = words_enc[i]
-            for j in range(total_words):
-                fb = compute_feedback(gi, words_enc[j])
-                f.write(struct.pack("B", fb))  # 1 byte
+        for answer_idx in tqdm(range(answers_count), desc="Answers"):
+            answer = words_enc[answer_idx]
+
+            for guess_idx in range(total_words):
+                guess = words_enc[guess_idx]
+
+                # IMPORTANT: feedback(guess, answer)
+                fb = compute_feedback(guess, answer)
+                f.write(struct.pack("B", fb))
 
     with open(os.path.join(CACHE_DIR, "words.pkl"), "wb") as f:
         pickle.dump(words, f)
