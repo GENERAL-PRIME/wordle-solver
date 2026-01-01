@@ -1,6 +1,7 @@
 import os
+import mmap
 import pickle
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -11,47 +12,43 @@ from wordle import (
     reset_entropy_cache,
 )
 
+CACHE_DIR = "cache"
+
 # --------------------------------------------------
-# App setup
+# LOAD METADATA
+# --------------------------------------------------
+with open(os.path.join(CACHE_DIR, "words.pkl"), "rb") as f:
+    words = pickle.load(f)
+
+with open(os.path.join(CACHE_DIR, "meta.pkl"), "rb") as f:
+    meta = pickle.load(f)
+
+ANSWERS = meta["answers_count"]
+TOTAL = meta["total_words"]
+
+# --------------------------------------------------
+# MMAP FEEDBACK TABLE
+# --------------------------------------------------
+fb_file = open(os.path.join(CACHE_DIR, "feedback.bin"), "rb")
+fb_map = mmap.mmap(fb_file.fileno(), 0, access=mmap.ACCESS_READ)
+
+
+def fb_get(answer_idx, guess_idx):
+    return fb_map[answer_idx * TOTAL + guess_idx]
+
+
+# --------------------------------------------------
+# FASTAPI
 # --------------------------------------------------
 app = FastAPI()
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
 )
 
-# --------------------------------------------------
-# Load cached data (must exist at startup)
-# --------------------------------------------------
-CACHE_DIR = "cache"
-
-try:
-    with open(os.path.join(CACHE_DIR, "words.pkl"), "rb") as f:
-        words = pickle.load(f)
-
-    with open(os.path.join(CACHE_DIR, "feedback_table.pkl"), "rb") as f:
-        fb_table = pickle.load(f)
-
-    with open(os.path.join(CACHE_DIR, "meta.pkl"), "rb") as f:
-        answers_count = pickle.load(f)
-
-except FileNotFoundError:
-    raise RuntimeError(
-        "Cache files missing. Ensure build_cache.py ran during deployment."
-    )
-
-# --------------------------------------------------
-# In-memory session store
-# --------------------------------------------------
 sessions = {}
 
 
-# --------------------------------------------------
-# API Models
-# --------------------------------------------------
 class StartResponse(BaseModel):
     session_id: str
     guess: str
@@ -69,23 +66,20 @@ class StepResponse(BaseModel):
     solved: bool
 
 
-# --------------------------------------------------
-# Endpoints
-# --------------------------------------------------
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 @app.post("/start", response_model=StartResponse)
-def start_game():
+def start():
     reset_entropy_cache()
 
     session_id = os.urandom(8).hex()
-    candidates = list(range(answers_count))
+    candidates = list(range(ANSWERS))
+    guess = words.index("crane") if "crane" in words else 0
 
-    # Strong fixed opener
-    guess = words.index("crane") if "crane" in words else candidates[0]
-
-    sessions[session_id] = {
-        "candidates": candidates,
-        "guess": guess,
-    }
+    sessions[session_id] = {"candidates": candidates, "guess": guess}
 
     return {
         "session_id": session_id,
@@ -97,42 +91,27 @@ def start_game():
 @app.post("/step", response_model=StepResponse)
 def step(req: StepRequest):
     state = sessions.get(req.session_id)
-    if state is None:
-        # IMPORTANT: do NOT crash the server
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid or expired session",
-        )
+    if not state:
+        return {"guess": "", "candidates": 0, "solved": False}
 
     candidates = state["candidates"]
     guess = state["guess"]
 
-    feedback = parse_feedback(req.feedback)
+    fb = parse_feedback(req.feedback)
 
-    # Solved
-    if feedback == 242:
-        return {
-            "guess": words[guess],
-            "candidates": 1,
-            "solved": True,
-        }
+    if fb == 242:
+        return {"guess": words[guess], "candidates": 1, "solved": True}
 
-    # Filter candidates (RECTANGULAR TABLE SAFE)
-    candidates = filter_candidates(candidates, guess, feedback, fb_table)
+    candidates = filter_candidates(candidates, guess, fb, fb_get)
 
     if not candidates:
-        return {
-            "guess": "",
-            "candidates": 0,
-            "solved": False,
-        }
+        return {"guess": "", "candidates": 0, "solved": False}
 
-    # Next guess
     if len(candidates) == 1:
         next_guess = candidates[0]
     else:
-        guess_space = list(range(len(words)))
-        next_guess = best_guess(candidates, guess_space, fb_table)
+        guess_space = range(TOTAL)
+        next_guess = best_guess(candidates, guess_space, fb_get)
 
     state["candidates"] = candidates
     state["guess"] = next_guess
