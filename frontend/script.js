@@ -151,4 +151,14 @@ async function init() {
   await startGame();
 }
 
+function openHowToPlay() {
+  document.getElementById("howToPlayModal").classList.remove("hidden");
+  document.getElementById("howToPlayModal").classList.add("flex");
+}
+
+function closeHowToPlay() {
+  document.getElementById("howToPlayModal").classList.add("hidden");
+  document.getElementById("howToPlayModal").classList.remove("flex");
+}
+
 init();

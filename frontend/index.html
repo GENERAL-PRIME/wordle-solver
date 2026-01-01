@@ -10,10 +10,14 @@
 
 <body class="bg-neutral-900 text-white min-h-screen flex justify-center select-none">
 
-
     <div class="w-full max-w-md p-4">
 
-        <h1 class="text-2xl font-bold text-center mb-4">Wordle Solver</h1>
+        <h1 class="text-2xl font-bold text-center mb-3">Wordle Solver</h1>
+
+        <!-- HOW TO PLAY BUTTON -->
+        <button onclick="openHowToPlay()" class="w-full mb-4 bg-blue-600 hover:bg-blue-700 p-2 rounded font-semibold">
+            ❓ How to Play
+        </button>
 
         <!-- CURRENT GUESS -->
         <div id="currentGuess" class="grid grid-cols-5 gap-2 mb-4"></div>
@@ -35,8 +39,57 @@
 
     </div>
 
-    <script src="script.js"></script>
+    <!-- HOW TO PLAY MODAL -->
+    <div id="howToPlayModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+        <div class="bg-neutral-800 text-white rounded-lg p-6 w-[90%] max-w-md shadow-lg">
 
+            <h2 class="text-xl font-bold mb-3 text-center">
+                🧩 How to Use the Wordle Solver
+            </h2>
+
+            <div class="space-y-3 text-sm text-gray-200">
+
+                <p>
+                    This tool helps you solve the daily Wordle by suggesting the best possible
+                    next guess based on your feedback.
+                </p>
+
+                <hr class="border-neutral-600" />
+
+                <h3 class="font-semibold">🎯 Tile Controls</h3>
+
+                <ul class="list-disc list-inside space-y-1">
+                    <li><b>No click</b> → ⬛ Grey / Black (letter not in word)</li>
+                    <li><b>1 click</b> → 🟨 Yellow (letter in word, wrong place)</li>
+                    <li><b>2 clicks</b> → 🟩 Green (correct letter & position)</li>
+                </ul>
+
+                <hr class="border-neutral-600" />
+
+                <h3 class="font-semibold">🛠 How to Play</h3>
+
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>Enter the suggested word into Wordle</li>
+                    <li>Click each tile to match Wordle’s colors</li>
+                    <li>Press <b>Submit Feedback</b></li>
+                    <li>Repeat until the word is solved 🎉</li>
+                </ol>
+
+                <p class="text-xs text-gray-400 mt-2">
+                    ⚠️ Make sure the colors exactly match Wordle’s feedback.
+                </p>
+
+            </div>
+
+            <button onclick="closeHowToPlay()"
+                class="mt-5 w-full bg-green-600 hover:bg-green-700 p-2 rounded font-semibold">
+                Got it!
+            </button>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
