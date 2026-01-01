@@ -547,3 +547,8 @@ The solver passes:
 - **Frontend** → Vercel / GitHub Pages
 - **Storage** → Local filesystem (ephemeral OK)
 - **Secrets** → None required
+
+## 📄 License
+
+This project is licensed under the **MIT License**.  
+You are free to use, modify, and distribute this software with attribution.
