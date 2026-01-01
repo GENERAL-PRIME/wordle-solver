@@ -170,6 +170,7 @@ def step(req: StepRequest):
     try:
         logger.info(f"Parsing feedback: {req.feedback}")
         fb = parse_feedback(req.feedback)
+        logger.info(f"Parsing feedback: {req.feedback}", extra={"fb_code": fb})
     except ValueError as e:
         logger.warning(f"Bad feedback '{req.feedback}': {e}")
         raise HTTPException(400, "Invalid feedback")
