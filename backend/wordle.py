@@ -17,7 +17,7 @@ def parse_feedback(s: str) -> int:
 
 
 def entropy(guess_idx, candidates, fb_get):
-    key = (guess_idx, tuple(candidates))
+    key = (guess_idx, frozenset(candidates))
     if key in entropy_cache:
         return entropy_cache[key]
 

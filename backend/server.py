@@ -77,7 +77,7 @@ def start():
 
     session_id = os.urandom(8).hex()
     candidates = list(range(ANSWERS))
-    guess = words.index("crane") if "crane" in words else 0
+    guess = words.index("crane")
 
     sessions[session_id] = {"candidates": candidates, "guess": guess}
 
