@@ -9,10 +9,26 @@ def reset_entropy_cache():
 
 
 def parse_feedback(s: str) -> int:
-    mapping = {"b": 0, "y": 1, "g": 2}
+    s = s.strip().lower()
+
+    mapping = {
+        "b": 0,
+        "0": 0,
+        "y": 1,
+        "1": 1,
+        "g": 2,
+        "2": 2,
+    }
+
+    if len(s) != 5:
+        raise ValueError("Invalid feedback length")
+
     code = 0
     for ch in s:
+        if ch not in mapping:
+            raise ValueError(f"Invalid feedback char: {ch}")
         code = code * 3 + mapping[ch]
+
     return code
 
 

@@ -94,7 +94,7 @@ async function submitFeedback() {
 
   if (gameSolved) return;
 
-  const feedback = buildFeedback();
+  const feedback = buildFeedback().toLowerCase();
   addToHistory(currentWord, feedback);
 
   let res;

@@ -159,8 +159,6 @@ def start():
 
 @app.post("/step", response_model=StepResponse)
 def step(req: StepRequest):
-    if not re.fullmatch(r"[012]{5}", req.feedback):
-        raise HTTPException(400, "Invalid feedback format")
 
     with lock:
         state = sessions.get(req.session_id)
@@ -169,7 +167,11 @@ def step(req: StepRequest):
 
         state["last_seen"] = time.time()
 
-    fb = parse_feedback(req.feedback)
+    try:
+        fb = parse_feedback(req.feedback)
+    except ValueError as e:
+        logger.warning(f"Bad feedback '{req.feedback}': {e}")
+        raise HTTPException(400, "Invalid feedback")
 
     if fb == SOLVED_FEEDBACK:
         return {
