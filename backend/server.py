@@ -1,6 +1,7 @@
 import os
 import mmap
 import pickle
+import re
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -96,6 +97,7 @@ def step(req: StepRequest):
 
     candidates = state["candidates"]
     guess = state["guess"]
+    print(req.feedback)
 
     fb = parse_feedback(req.feedback)
 
