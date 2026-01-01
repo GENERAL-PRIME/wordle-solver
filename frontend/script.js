@@ -1,5 +1,5 @@
 let gameSolved = false;
-const API = "https://wordle-solver-bt4t.onrender.com"; // Adjust as needed
+const API = "https://wordle-solver-dy13.onrender.com"; // Adjust as needed
 let sessionId = null;
 let currentWord = "";
 let tileState = []; // 0=b,1=y,2=g
