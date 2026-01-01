@@ -168,6 +168,7 @@ def step(req: StepRequest):
         state["last_seen"] = time.time()
 
     try:
+        logger.debug(f"Parsing feedback: {req.feedback}")
         fb = parse_feedback(req.feedback)
     except ValueError as e:
         logger.warning(f"Bad feedback '{req.feedback}': {e}")
