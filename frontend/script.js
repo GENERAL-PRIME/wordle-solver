@@ -87,10 +87,10 @@ async function wakeBackend() {
 }
 
 async function submitFeedback() {
-  if (!tileState.some((v) => v !== 0)) {
-    alert("Please enter feedback before submitting.");
-    return;
-  }
+  // if (!tileState.some((v) => v !== 0)) {
+  //   alert("Please enter feedback before submitting.");
+  //   return;
+  // }
 
   if (gameSolved) return;
 
