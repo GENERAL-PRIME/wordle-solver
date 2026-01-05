@@ -19,26 +19,59 @@ def encode_words(words):
 
 
 def compute_feedback(guess, target):
-    fb = [0] * 5
-    used = [False] * 5
+    fb0 = fb1 = fb2 = fb3 = fb4 = 0
 
-    for i in range(5):
-        if guess[i] == target[i]:
-            fb[i] = 2
-            used[i] = True
+    # Frequency dict for unmatched target chars
+    freq = {}
 
-    for i in range(5):
-        if fb[i] == 0:
-            for j in range(5):
-                if not used[j] and guess[i] == target[j]:
-                    fb[i] = 1
-                    used[j] = True
-                    break
+    # Pass 1: exact matches + count leftovers
+    g0, g1, g2, g3, g4 = guess
+    t0, t1, t2, t3, t4 = target
 
-    code = 0
-    for v in fb:
-        code = code * 3 + v
-    return code
+    if g0 == t0:
+        fb0 = 2
+    else:
+        freq[t0] = freq.get(t0, 0) + 1
+
+    if g1 == t1:
+        fb1 = 2
+    else:
+        freq[t1] = freq.get(t1, 0) + 1
+
+    if g2 == t2:
+        fb2 = 2
+    else:
+        freq[t2] = freq.get(t2, 0) + 1
+
+    if g3 == t3:
+        fb3 = 2
+    else:
+        freq[t3] = freq.get(t3, 0) + 1
+
+    if g4 == t4:
+        fb4 = 2
+    else:
+        freq[t4] = freq.get(t4, 0) + 1
+
+    # Pass 2: partial matches (no nested loops)
+    if fb0 == 0 and freq.get(g0, 0):
+        fb0 = 1
+        freq[g0] -= 1
+    if fb1 == 0 and freq.get(g1, 0):
+        fb1 = 1
+        freq[g1] -= 1
+    if fb2 == 0 and freq.get(g2, 0):
+        fb2 = 1
+        freq[g2] -= 1
+    if fb3 == 0 and freq.get(g3, 0):
+        fb3 = 1
+        freq[g3] -= 1
+    if fb4 == 0 and freq.get(g4, 0):
+        fb4 = 1
+        freq[g4] -= 1
+
+    # Base-3 encoding (fully unrolled)
+    return (((fb0 * 3 + fb1) * 3 + fb2) * 3 + fb3) * 3 + fb4
 
 
 def main():
