@@ -86,23 +86,38 @@ def main():
 
     words_enc = encode_words(words)
 
+    # Local bindings (IMPORTANT for speed)
+    compute_fb = compute_feedback
+    enc = words_enc
+    guess_range = range(total_words)
+
     print("🧠 Building mmap feedback.bin …")
-    with open(BIN_PATH, "wb") as f:
+
+    # Large buffer improves throughput
+    with open(BIN_PATH, "wb", buffering=1024 * 1024) as f:
         for answer_idx in tqdm(range(answers_count), desc="Answers"):
-            answer = words_enc[answer_idx]
+            answer = enc[answer_idx]
 
-            for guess_idx in range(total_words):
-                guess = words_enc[guess_idx]
+            # One full row = total_words bytes
+            row = bytearray(total_words)
 
-                # IMPORTANT: feedback(guess, answer)
-                fb = compute_feedback(guess, answer)
-                f.write(struct.pack("B", fb))
+            for guess_idx in guess_range:
+                row[guess_idx] = compute_fb(enc[guess_idx], answer)
+
+            # SINGLE write per answer (huge win)
+            f.write(row)
 
     with open(os.path.join(CACHE_DIR, "words.pkl"), "wb") as f:
         pickle.dump(words, f)
 
     with open(os.path.join(CACHE_DIR, "meta.pkl"), "wb") as f:
-        pickle.dump({"answers_count": answers_count, "total_words": total_words}, f)
+        pickle.dump(
+            {
+                "answers_count": answers_count,
+                "total_words": total_words,
+            },
+            f,
+        )
 
     print("✅ mmap cache built successfully!")
 
