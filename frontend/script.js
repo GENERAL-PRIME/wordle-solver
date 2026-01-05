@@ -42,6 +42,14 @@ function renderCurrentGuess() {
   }
 }
 
+function showLoading() {
+  document.getElementById("loadingOverlay")?.classList.remove("hidden");
+}
+
+function hideLoading() {
+  document.getElementById("loadingOverlay")?.classList.add("hidden");
+}
+
 function cycleTile(idx) {
   if (gameSolved) return;
   tileState[idx] = (tileState[idx] + 1) % 3;
@@ -84,11 +92,31 @@ async function startGame() {
   document.getElementById(
     "info"
   ).innerText = `Candidates remaining: ${data.candidates}`;
+
+  hideLoading();
 }
+
 async function wakeBackend() {
-  try {
-    await fetch(`${API}/health`);
-  } catch {}
+  showLoading();
+
+  const start = Date.now();
+  const TIMEOUT = 60000; // 60 seconds max wait
+
+  while (true) {
+    try {
+      const res = await fetch(`${API}/health`);
+      if (res.ok) return;
+    } catch {}
+
+    if (Date.now() - start > TIMEOUT) {
+      alert(
+        "Backend is taking too long to start.\nPlease try refreshing in a moment."
+      );
+      break;
+    }
+
+    await new Promise((r) => setTimeout(r, 3000)); // retry every 3s
+  }
 }
 
 async function submitFeedback() {
