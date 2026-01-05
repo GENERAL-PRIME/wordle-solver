@@ -6,27 +6,32 @@ let tileState = []; // 0=b,1=y,2=g
 
 // ---------------- TILE RENDER ----------------
 function tile(letter, state, idx, clickable = true) {
-  const colors = ["bg-neutral-700", "bg-yellow-500", "bg-green-600"];
-  const canClick = clickable && !gameSolved;
+  const colors = [
+    "bg-neutral-700",
+    "bg-yellow-500 tile-yellow",
+    "bg-green-600 tile-green",
+  ];
 
   return `
-        <div
-          ${canClick ? `onclick="cycleTile(${idx})"` : ""}
-          class="
-            ${colors[state]}
-            aspect-square flex items-center justify-center
-            text-xl font-bold uppercase rounded
-            ${
-              canClick
-                ? "cursor-pointer"
-                : "cursor-default opacity-60 pointer-events-none"
-            }
-            select-none
-          "
-        >
-          ${letter}
-        </div>
-    `;
+    <div
+      ${clickable && !gameSolved ? `onclick="cycleTile(${idx})"` : ""}
+      class="
+        tile ${colors[state]}
+        aspect-square rounded-xl
+        flex items-center justify-center
+        uppercase font-black
+
+        ${
+          clickable
+            ? "text-3xl sm:text-4xl hover:scale-105 hover:brightness-110 cursor-pointer"
+            : "text-xl"
+        }
+
+      "
+    >
+      ${letter}
+    </div>
+  `;
 }
 
 function renderCurrentGuess() {
