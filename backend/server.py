@@ -4,7 +4,6 @@ import pickle
 import time
 import logging
 import threading
-import re
 from typing import Dict, List
 
 from fastapi import FastAPI, HTTPException
@@ -18,9 +17,7 @@ from wordle import (
     reset_entropy_cache,
 )
 
-# --------------------------------------------------
 # CONFIG
-# --------------------------------------------------
 CACHE_DIR = "cache"
 SESSION_TTL = 15 * 60  # 15 minutes
 MAX_SESSIONS = 500  # hard cap
@@ -28,15 +25,11 @@ MAX_ENTROPY_GUESSES = 64  # entropy limit
 START_WORD = "crane"
 SOLVED_FEEDBACK = int("22222", 3)
 
-# --------------------------------------------------
 # LOGGING
-# --------------------------------------------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wordle-api")
 
-# --------------------------------------------------
 # LOAD DATA
-# --------------------------------------------------
 with open(os.path.join(CACHE_DIR, "words.pkl"), "rb") as f:
     words: List[str] = pickle.load(f)
 
@@ -51,9 +44,7 @@ WORD_TO_INDEX = {w: i for i, w in enumerate(words)}
 if START_WORD not in WORD_TO_INDEX:
     raise RuntimeError("Start word missing from dictionary")
 
-# --------------------------------------------------
 # MMAP FEEDBACK TABLE
-# --------------------------------------------------
 fb_file = open(os.path.join(CACHE_DIR, "feedback.bin"), "rb")
 fb_map = mmap.mmap(fb_file.fileno(), 0, access=mmap.ACCESS_READ)
 
@@ -62,9 +53,7 @@ def fb_get(answer_idx: int, guess_idx: int) -> int:
     return fb_map[answer_idx * TOTAL + guess_idx]
 
 
-# --------------------------------------------------
 # FASTAPI
-# --------------------------------------------------
 app = FastAPI(title="Wordle Solver API")
 
 app.add_middleware(
@@ -74,9 +63,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --------------------------------------------------
 # SESSION STORE (SAFE + BOUNDED)
-# --------------------------------------------------
 sessions: Dict[str, Dict] = {}
 lock = threading.Lock()
 
@@ -88,9 +75,7 @@ def cleanup_sessions():
         del sessions[sid]
 
 
-# --------------------------------------------------
 # MODELS
-# --------------------------------------------------
 class StartResponse(BaseModel):
     session_id: str
     guess: str
@@ -108,9 +93,7 @@ class StepResponse(BaseModel):
     solved: bool
 
 
-# --------------------------------------------------
 # LIFECYCLE
-# --------------------------------------------------
 @app.on_event("startup")
 def startup():
     reset_entropy_cache()
@@ -124,9 +107,7 @@ def shutdown():
     logger.info("Clean shutdown")
 
 
-# --------------------------------------------------
 # ROUTES
-# --------------------------------------------------
 @app.get("/health")
 def health():
     return {"status": "ok"}
