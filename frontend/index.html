@@ -13,7 +13,8 @@
 
 <body class="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-black text-white select-none">
 
-    <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="min-h-screen flex justify-center p-4 md:items-center">
+
 
         <!-- MAIN WRAPPER -->
         <div class="
@@ -36,7 +37,8 @@
 
                 <div id="history" class="
                     space-y-3
-                    max-h-[60vh] md:max-h-[75vh]
+                    max-h-[55vh] md:max-h-[75vh]
+
                     overflow-y-auto
                     pr-2
                     hide-scrollbar
@@ -48,10 +50,14 @@
 
             <!-- ================= RIGHT : GAME ================= -->
             <div class="
-            md:w-2/3
-            order-1 md:order-2
-            flex flex-col
+              md:w-2/3
+              order-1 md:order-2
+              flex flex-col
+            md:static md:bg-transparent
+              sticky top-0 z-20
+              pb-4
             ">
+
 
                 <!-- HEADER -->
                 <h1 class="text-3xl font-extrabold text-center mb-1 tracking-wide">
